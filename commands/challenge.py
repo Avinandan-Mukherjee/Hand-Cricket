@@ -396,7 +396,7 @@ class TossButtons(discord.ui.View):
         await interaction.response.edit_message(
             content=(
                 f"**Toss Result: {self.chosenHT}**\n\n"
-                f"{tossWinner.name} won the toss\n"
+                f"{tossWinner.mention} won the toss\n"
                 f"{tossWinner.name}, choose Batting or Bowling."
             ),
             view=batball
