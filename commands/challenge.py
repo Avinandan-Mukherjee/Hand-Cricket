@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 import asyncio
+from database import update_stats, create_user
 
 
 #main game logic
@@ -44,6 +45,9 @@ class MainGame(discord.ui.View):
 
 
         self.player1 = True
+
+        self.player1stats={"uid": self.plr1.id, "wickets":0}
+        self.player2stats={"uid":self.plr2.id, "wickets":0}
 
     async def play(self, interaction, value):
         
@@ -113,6 +117,8 @@ class MainGame(discord.ui.View):
     
                 self.embed=interaction.message.embeds[0]
                 self.embed.description=f"**{self.plr1.name} is out.**"
+                self.player2stats["wickets"]=1
+
                 self.embed.clear_fields()
                 self.embed.add_field(name=f"{self.plr1.name} Runs",value=f"{self.totalRun}")
                 self.embed.add_field(name=f"To Win", value=f"{self.plr2.name} has to score {(self.totalRun)+1}")
@@ -165,6 +171,9 @@ class MainGame(discord.ui.View):
                     self.embed.add_field(name=f"***{self.plr2.name} Won the match***", value="\u200b", inline=False)
                     self.embed.color = discord.Color.from_str("#6cf542")
                     await interaction.response.edit_message(embed=self.embed, view=None)
+                    self.player2stats.update({"result":"wins", "runs":self.targetRun})
+                    self.player1stats.update({"result":"losses", "runs":self.totalRun})
+                    
 
                 else:
                     await interaction.response.edit_message(embed=self.embed, view=self)
@@ -173,6 +182,8 @@ class MainGame(discord.ui.View):
             elif(a==b):
                 self.embed=interaction.message.embeds[0]
                 self.embed.description=f"**{self.plr2.name} is out.**"
+                self.player1stats["wickets"]=1
+
                 self.embed.set_field_at(0, name=f"{self.plr1.name} Runs",value=f"{self.totalRun}")
                 self.embed.set_field_at(1, name=f"{self.plr2.name} Runs",value=f"{self.targetRun}")
 
@@ -189,14 +200,25 @@ class MainGame(discord.ui.View):
 
                 if self.targetRun == self.totalRun:
                     self.embed.add_field(name="***Match Draw***", value="\u200b", inline=False)
+                    self.player2stats.update({"runs":self.targetRun})
+                    self.player1stats.update({"runs":self.totalRun})
                     self.embed.color = discord.Color.from_str("#eeff00")
 
                 else:
                     self.embed.add_field(name=f"***{self.plr1.name} Won the match***", value="\u200b", inline=False)
                     self.embed.color = discord.Color.from_str("#6cf542")
+
+                    self.player2stats.update({"result":"losses", "runs":self.targetRun})
+                    self.player1stats.update({"result":"wins", "runs":self.totalRun})
                 await interaction.response.edit_message(embed = self.embed, view=None)
 
+        if "runs" in self.player1stats:
+            await create_user(self.plr1.id, self.plr1.name)
+            await create_user(self.plr2.id, self.plr2.name)
+            await update_stats(self.player1stats["uid"], self.player1stats.get("result"), self.player1stats["runs"], self.player1stats["wickets"])
+            await update_stats(self.player2stats["uid"], self.player2stats.get("result"), self.player2stats["runs"], self.player2stats["wickets"])
 
+        
         
 
     @discord.ui.button(

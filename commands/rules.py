@@ -14,10 +14,8 @@ async def rules(ctx):
 name="🪙 **The Toss Round**",
 value="""
 1. One player gets picked to call Heads or Tails.
-2. Both players secretly pick a number between 0 and 6.
-3.Add both numbers together and count back and forth starting from Heads: Heads, Tails, Heads, Tails...
-`Example: If the total is 4, it lands on Tails. If the total is 7, it lands on Heads.`
-4. Whoever wins the toss gets to decide whether to Bat or Bowl first.
+2. The computer randomly flips a coin to reveal the result.
+3. Whoever wins the toss gets to decide whether to Bat or Bowl first.
  
  """,
 inline=False
